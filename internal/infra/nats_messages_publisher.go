@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs/sl"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs/sl"
 	"os"
 	"time"
 
@@ -13,8 +13,8 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	nc "github.com/nats-io/nats.go"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
 )
 
 type natsMessagesPublisher struct {

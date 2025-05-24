@@ -11,13 +11,13 @@ import (
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/command"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/decorator"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs/handlers/slogdiscard"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/metrics"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/internal/infra"
 	"github.com/bmstu-itstech/itsreg-bots/internal/service/mocks"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs/handlers/slogdiscard"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/metrics"
 )
 
 func NewApplication() (

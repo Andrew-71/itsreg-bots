@@ -13,8 +13,8 @@ import (
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/jwtauth"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/jwtauth"
 )
 
 type Server struct {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
 )
 
 type Port struct {

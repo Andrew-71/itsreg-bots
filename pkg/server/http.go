@@ -10,9 +10,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/jwtauth"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/logs/sl"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/jwtauth"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
+	"github.com/bmstu-itstech/itsreg-bots/pkg/logs/sl"
 )
 
 func RunHTTPServer(createHandler func(router chi.Router) http.Handler) {
