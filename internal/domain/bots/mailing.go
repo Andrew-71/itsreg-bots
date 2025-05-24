@@ -1,7 +1,5 @@
 package bots
 
-import "github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
-
 type Mailing struct {
 	Name         string
 	EntryKey     string
@@ -14,11 +12,14 @@ func NewMailing(
 	requireState int,
 ) (Mailing, error) {
 	if name == "" {
-		return Mailing{}, commonerrs.NewInvalidInputError("expected not empty name")
+		return Mailing{}, NewInvalidInputError(
+			"invalid-mailing",
+			"expected non-empty name",
+		)
 	}
 
 	if entryKey == "" {
-		return Mailing{}, commonerrs.NewInvalidInputError("expected not empty entryKey")
+		return Mailing{}, errEntryPointIsEmpty
 	}
 
 	return Mailing{

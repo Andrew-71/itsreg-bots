@@ -2,8 +2,6 @@ package bots
 
 import (
 	"slices"
-
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
 )
 
 type Message struct {
@@ -17,7 +15,10 @@ func (m Message) IsZero() bool {
 
 func NewPlainMessage(text string) (Message, error) {
 	if text == "" {
-		return Message{}, commonerrs.NewInvalidInputError("expected not empty message text")
+		return Message{}, NewInvalidInputError(
+			"invalid-message",
+			"expected non-empty message text",
+		)
 	}
 
 	return Message{
@@ -39,11 +40,17 @@ func NewMessageWithButtons(
 	options []Option,
 ) (Message, error) {
 	if text == "" {
-		return Message{}, commonerrs.NewInvalidInputError("expected not empty message text")
+		return Message{}, NewInvalidInputError(
+			"invalid-message",
+			"expected non-empty message text",
+		)
 	}
 
 	if len(options) == 0 {
-		return Message{}, commonerrs.NewInvalidInputError("expected not empty message options")
+		return Message{}, NewInvalidInputError(
+			"invalid-message",
+			"expected non-empty message options",
+		)
 	}
 
 	buttons := make([]string, len(options))

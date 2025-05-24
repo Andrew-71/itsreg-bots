@@ -12,7 +12,6 @@ import (
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/command"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/jwtauth"
 )
@@ -47,8 +46,10 @@ func (s Server) CreateBot(w http.ResponseWriter, r *http.Request) {
 		Mailings:   convertOptionalMailingsFromAPI(postBots.Mailings),
 		Blocks:     convertBlocksFromAPI(postBots.Blocks),
 	})
-	if errors.As(err, &commonerrs.InvalidInputError{}) {
-		httpError(w, r, err, http.StatusBadRequest)
+
+	var iiErr bots.InvalidInputError
+	if errors.As(err, &iiErr) {
+		httpSlugError(w, r, iiErr.Error(), iiErr.Slug(), http.StatusBadRequest)
 		return
 	}
 	if errors.Is(err, bots.ErrPermissionDenied) {
@@ -110,8 +111,10 @@ func (s Server) CreateMailing(w http.ResponseWriter, r *http.Request, botUUID st
 		EntryPoint:    convertEntryPointFromAPI(createMailing.EntryPoint),
 		Blocks:        convertBlocksFromAPI(createMailing.Blocks),
 	})
-	if errors.As(err, &commonerrs.InvalidInputError{}) {
-		httpError(w, r, err, http.StatusBadRequest)
+
+	var iiErr bots.InvalidInputError
+	if errors.As(err, &iiErr) {
+		httpSlugError(w, r, iiErr.Error(), iiErr.Slug(), http.StatusBadRequest)
 		return
 	}
 	if errors.As(err, &bots.BotNotFoundError{}) {
@@ -283,6 +286,14 @@ func (s Server) GetAnswers(w http.ResponseWriter, r *http.Request, uuid string) 
 func httpError(w http.ResponseWriter, r *http.Request, err error, code int) {
 	render.Status(r, code)
 	render.JSON(w, r, Error{Message: err.Error()})
+}
+
+func httpSlugError(w http.ResponseWriter, r *http.Request, msg string, slug string, code int) {
+	render.Status(r, code)
+	render.JSON(w, r, Error{
+		// ошибки its-reg v2 слишком умные для api первой версии
+		Message: fmt.Sprintf("%s: %s", slug, msg),
+	})
 }
 
 func convertOptionToAPI(option types.Option) Option {

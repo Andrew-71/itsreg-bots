@@ -2,7 +2,6 @@ package bots
 
 import (
 	"fmt"
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
 )
 
 type Status struct {
@@ -32,7 +31,8 @@ func NewStatusFromString(s string) (Status, error) {
 	case "failed":
 		return Failed, nil
 	}
-	return Status{}, commonerrs.NewInvalidInputError(
-		fmt.Sprintf("invalid status %s, expected one of ['started', 'stopped', 'failed']", s),
+	return Status{}, NewInvalidInputError(
+		"invalid-status",
+		fmt.Sprintf("expected one of ['started', 'stopped', 'failed'], got %s", s),
 	)
 }

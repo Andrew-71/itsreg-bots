@@ -1,10 +1,6 @@
 package bots
 
-import (
-	"fmt"
-
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
-)
+import "fmt"
 
 type BlockType struct {
 	s string
@@ -33,7 +29,8 @@ func NewBlockTypeFromString(s string) (BlockType, error) {
 	case "selection":
 		return SelectionBlock, nil
 	}
-	return BlockType{}, commonerrs.NewInvalidInputError(
-		fmt.Sprintf("invalid block type %s, expected one of ['message', 'question', 'selection']", s),
+	return BlockType{}, NewInvalidInputError(
+		"invalid-block",
+		fmt.Sprintf("expected one of ['message', 'question', 'selection'], got %s", s),
 	)
 }

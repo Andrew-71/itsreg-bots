@@ -6,15 +6,10 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/funcs/maps"
 )
 
 const startEntryKey = "start"
-
-var errBlockIsEmpty = commonerrs.NewInvalidInputErrorf("expectec not empty block")
-var errEntryPointIsEmpty = commonerrs.NewInvalidInputErrorf("expectec not empty entry point")
-var errMailingIsEmpty = commonerrs.NewInvalidInputErrorf("expectec not empty mailing")
 
 type Bot struct {
 	UUID string
@@ -43,15 +38,24 @@ func NewBot(
 	token string,
 ) (*Bot, error) {
 	if uuid == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty uuid")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty bot uuid",
+		)
 	}
 
 	if ownerUUID == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty owner uuid")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty owner uuid",
+		)
 	}
 
 	if len(entries) == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty entries")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one entry",
+		)
 	}
 
 	if mailings == nil {
@@ -59,19 +63,31 @@ func NewBot(
 	}
 
 	if len(blocks) == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty blocks")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one block",
+		)
 	}
 
 	if name == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty name")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty name",
+		)
 	}
 
 	if token == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty token")
+		return nil, NewInvalidInputError(
+			"invalid-token",
+			"expected non-empty token",
+		)
 	}
 
 	if !regexp.MustCompile("[0-9]{8,10}:[a-zA-Z0-9_-]{35}").MatchString(token) {
-		return nil, commonerrs.NewInvalidInputError("invalid token")
+		return nil, NewInvalidInputError(
+			"invalid-token",
+			"token doesn't satisfy regex",
+		)
 	}
 
 	for _, entry := range entries {
@@ -119,9 +135,10 @@ func NewBot(
 
 	for entryKey, mailing := range ms {
 		if _, ok := es[entryKey]; !ok {
-			return nil, commonerrs.NewInvalidInputErrorf(
-				"mailing %q has non-existent entry key %q",
-				mailing.Name, entryKey,
+			return nil, NewInvalidInputError(
+				"invalid-mailing",
+				fmt.Sprintf("mailing %q has non-existent entry key %q",
+					mailing.Name, entryKey),
 			)
 		}
 	}
@@ -169,43 +186,70 @@ func UnmarshallBotFromDB(
 	updatedAt time.Time,
 ) (*Bot, error) {
 	if uuid == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty uuid")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty bot uuid",
+		)
 	}
 
 	if ownerUUID == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty owner uuid")
-	}
-
-	if name == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty name")
-	}
-
-	if token == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty token")
-	}
-
-	if status == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty status")
-	}
-
-	if createdAt.IsZero() {
-		return nil, commonerrs.NewInvalidInputError("expected not empty created at timestamp")
-	}
-
-	if updatedAt.IsZero() {
-		return nil, commonerrs.NewInvalidInputError("expected not empty updated at timestamp")
-	}
-
-	if len(blocks) == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty blocks")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty owner id",
+		)
 	}
 
 	if len(entries) == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty entries")
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one entry",
+		)
 	}
 
 	if mailings == nil {
 		mailings = make([]Mailing, 0)
+	}
+
+	if len(blocks) == 0 {
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one block",
+		)
+	}
+
+	if name == "" {
+		return nil, NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty name",
+		)
+	}
+
+	if token == "" {
+		return nil, NewInvalidInputError(
+			"invalid-token",
+			"expected non-empty token",
+		)
+	}
+
+	if status == "" {
+		return nil, NewInvalidInputError(
+			"invalid-status",
+			"expected non-empty status",
+		)
+	}
+
+	if createdAt.IsZero() {
+		return nil, NewInvalidInputError(
+			"invalid-timestamp",
+			"expected non-empty created-at timestamp",
+		)
+	}
+
+	if updatedAt.IsZero() {
+		return nil, NewInvalidInputError(
+			"invalid-timestamp",
+			"expected non-empty updated-at timestamp",
+		)
 	}
 
 	bs, err := mapBlocks(blocks)
@@ -389,31 +433,36 @@ const (
 )
 
 func newBlockNotFoundError(state int) error {
-	return commonerrs.NewInvalidInputError(
+	return NewInvalidInputError(
+		"invalid-block-not-found",
 		fmt.Sprintf("block with state %d not found", state),
 	)
 }
 
 func newBlockIsDuplicatedError(state int) error {
-	return commonerrs.NewInvalidInputError(
+	return NewInvalidInputError(
+		"invalid-block-duplicate",
 		fmt.Sprintf("block with state %d is duplicated", state),
 	)
 }
 
 func newUnusedBlockFoundError(state int) error {
-	return commonerrs.NewInvalidInputError(
+	return NewInvalidInputError(
+		"invalid-block-unused",
 		fmt.Sprintf("block with state %d is unused", state),
 	)
 }
 
 func newEntryIsDuplicatedError(key string) error {
-	return commonerrs.NewInvalidInputError(
+	return NewInvalidInputError(
+		"invalid-entry-duplicate",
 		fmt.Sprintf("entry with key '%s' is duplicated", key),
 	)
 }
 
 func newMailingIsDuplicatedError(key string) error {
-	return commonerrs.NewInvalidInputError(
+	return NewInvalidInputError(
+		"invalid-mailing-duplicate",
 		fmt.Sprintf("mailing with key '%s' is duplicated", key),
 	)
 }
@@ -507,11 +556,11 @@ func (b *Bot) Traverse(startState int) []Block {
 		return v.Color != white
 	}
 
-	traveled := make([]Block, 0, len(vs))
+	travelled := make([]Block, 0, len(vs))
 	for _, v := range maps.Filter(vs, notWhitePredicate) {
-		traveled = append(traveled, v.Block)
+		travelled = append(travelled, v.Block)
 	}
-	return traveled
+	return travelled
 }
 
 func (b *Bot) traverseRecursive(vertices map[int]*vertex, currentState int) {

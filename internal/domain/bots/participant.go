@@ -1,9 +1,5 @@
 package bots
 
-import (
-	"github.com/bmstu-itstech/itsreg-bots/internal/common/commonerrs"
-)
-
 type Participant struct {
 	BotUUID string
 	UserID  int64
@@ -16,11 +12,17 @@ func NewParticipant(
 	id int64,
 ) (*Participant, error) {
 	if botUUID == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty botUUID")
+		return nil, NewInvalidInputError(
+			"invalid-participant",
+			"expected non-empty bot uuid",
+		)
 	}
 
 	if id == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty id")
+		return nil, NewInvalidInputError(
+			"invalid-participant",
+			"expected non-empty id",
+		)
 	}
 
 	return &Participant{
@@ -49,11 +51,17 @@ func UnmarshallParticipantFromDB(
 	answers []Answer,
 ) (*Participant, error) {
 	if botUUID == "" {
-		return nil, commonerrs.NewInvalidInputError("expected not empty botUUID")
+		return nil, NewInvalidInputError(
+			"invalid-participant",
+			"expected non-empty bot uuid",
+		)
 	}
 
 	if id == 0 {
-		return nil, commonerrs.NewInvalidInputError("expected not empty id")
+		return nil, NewInvalidInputError(
+			"invalid-participant",
+			"expected non-empty id",
+		)
 	}
 
 	m := make(map[int]Answer)
@@ -95,9 +103,7 @@ func (p *Participant) AddAnswer(text string) error {
 }
 
 func (p *Participant) CleanAnswerIfExists(state int) {
-	if _, ok := p.answers[state]; ok {
-		delete(p.answers, state)
-	}
+	delete(p.answers, state)
 }
 
 func (p *Participant) HasAnswer(state int) bool {
