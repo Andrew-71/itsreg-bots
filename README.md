@@ -16,12 +16,8 @@ docker compose -f deployment/docker-compose.local.yaml up -d
 - `go test -short ./internal/domain/...` - юнит-тесты домена;
 - `go test -count=1 ./internal/infra/...` - интеграционные (инфраструктурные) тесты; также требуется задать переменную
   окружения `DATABASE_URL` (для local - `postgres://test-user:test-pass@localhost:30001/test-db?sslmode=disable`);
-- `go test -count=1 ./internal/ports/...` - компонентные (функциональные) тесты; также требуется задать переменную 
-  окружения `PORT`.
 
-Запуск серверов:
-- `go run ./cmd/http/http.go` - HTTP API сервиса, требуется задать переменные окружения `PORT` и `DATABASE_URL`;
-- `go run ./cmd/telegram/telegram.go` - сервер для взаимодействия с telegram API, требуется задать переменную окружения `DATABASE_URL`.
+Запуск HTTP сервера API - `go run ./cmd/http/http.go` (требуется задать переменные окружения `PORT` и `DATABASE_URL`)
 
 ### Дев
 
@@ -44,4 +40,3 @@ docker compose -f deployment/docker-compose.prod.yaml up -d
 ```
 
 Загружает окружение из `.env` файла. Пример содержимого `.env` представлен в файле 
-

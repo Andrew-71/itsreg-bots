@@ -32,16 +32,6 @@ services:
     networks:
       - ir-web-bots
 
-  bots-nats:
-    image: nats:alpine
-    container_name: ir-bots-nats
-    restart: always
-    ports:
-      - "4222:4222"
-      - "8222:8222"
-    volumes:
-      - ~/.docker/itsreg/nats/data:/data
-
 networks:
   ir-web-bots:
     driver: bridge

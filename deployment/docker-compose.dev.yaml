@@ -3,8 +3,6 @@ services:
     container_name: ir-bots-http
     build:
       context: ../
-      args:
-        SERVICE: http
     ports:
       - 8400:${PORT:-8400}
     env_file:
@@ -12,24 +10,6 @@ services:
     depends_on:
       bots-db:
         condition: service_healthy
-      bots-nats:
-        condition: service_started
-    networks:
-      - ir-web-bots
-
-  bots-telegram:
-    container_name: ir-bots-telegram
-    build:
-      context: ../
-      args:
-        SERVICE: telegram
-    env_file:
-      - ../.env
-    depends_on:
-      bots-db:
-        condition: service_healthy
-      bots-nats:
-        condition: service_started
     networks:
       - ir-web-bots
 
@@ -65,20 +45,6 @@ services:
     depends_on:
       bots-db:
         condition: service_healthy
-
-  bots-nats:
-    image: nats:alpine
-    container_name: ir-bots-nats
-    restart: always
-    ports:
-      - "4222:4222"
-      - "8222:8222"
-    volumes:
-      - ~/.docker/itsreg/nats/data:/data
-    networks:
-      ir-web-bots:
-        aliases:
-          - nats
 
 networks:
   ir-web-bots:
