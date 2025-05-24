@@ -1,4 +1,4 @@
-package command
+package app
 
 import (
 	"context"
@@ -8,28 +8,28 @@ import (
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
 
-type Entry struct {
+type Process struct {
 	BotUUID string
 	UserID  int64
-	Key     string
+	Text    string
 }
 
-type EntryHandler decorator.CommandHandler[Entry]
+type ProcessHandler decorator.CommandHandler[Process]
 
-type entryHandler struct {
+type processHandler struct {
 	bots         bots.Repository
 	participants bots.ParticipantRepository
 	msgPublisher bots.MessagesPublisher
 }
 
-func NewEntryHandler(
+func NewProcessHandler(
 	bots bots.Repository,
 	participants bots.ParticipantRepository,
 	msgPublisher bots.MessagesPublisher,
 
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
-) EntryHandler {
+) ProcessHandler {
 	if bots == nil {
 		panic("bots repository is nil")
 	}
@@ -42,14 +42,14 @@ func NewEntryHandler(
 		panic("message publisher is nil")
 	}
 
-	return decorator.ApplyCommandDecorators[Entry](
-		entryHandler{bots: bots, participants: participants, msgPublisher: msgPublisher},
+	return decorator.ApplyCommandDecorators[Process](
+		processHandler{bots: bots, participants: participants, msgPublisher: msgPublisher},
 		logger,
 		metricsClient,
 	)
 }
 
-func (h entryHandler) Handle(ctx context.Context, cmd Entry) error {
+func (h processHandler) Handle(ctx context.Context, cmd Process) error {
 	bot, err := h.bots.Bot(ctx, cmd.BotUUID)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (h entryHandler) Handle(ctx context.Context, cmd Entry) error {
 	return h.participants.UpdateOrCreate(ctx, cmd.BotUUID, cmd.UserID, func(
 		innerCtx context.Context, prt *bots.Participant,
 	) error {
-		messages, err := bot.Entry(prt, cmd.Key)
+		messages, err := bot.Process(prt, cmd.Text)
 		if err != nil {
 			return err
 		}

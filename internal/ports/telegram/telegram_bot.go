@@ -6,14 +6,12 @@ import (
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/command"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
+	app_l "github.com/bmstu-itstech/itsreg-bots/internal/app"
 )
 
 type telegramBot struct {
 	botUUID string
-	app     *app.Application
+	app     *app_l.Application
 	log     *slog.Logger
 	stopCh  chan struct{}
 	api     *tg.BotAPI
@@ -22,10 +20,10 @@ type telegramBot struct {
 func newTelegramBot(
 	ctx context.Context,
 	botUUID string,
-	app *app.Application,
+	app *app_l.Application,
 	log *slog.Logger,
 ) (*telegramBot, error) {
-	appBot, err := app.Queries.GetBot.Handle(ctx, query.GetBot{BotUUID: botUUID})
+	appBot, err := app.Queries.GetBot.Handle(ctx, app_l.GetBot{BotUUID: botUUID})
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +51,7 @@ func (b *telegramBot) Start(ctx context.Context) error {
 		return err
 	}
 
-	err = b.app.Commands.UpdateStatus.Handle(ctx, command.UpdateStatus{
+	err = b.app.Commands.UpdateStatus.Handle(ctx, app_l.UpdateStatus{
 		BotUUID: b.botUUID,
 		Status:  "started",
 	})
@@ -67,7 +65,7 @@ func (b *telegramBot) Start(ctx context.Context) error {
 }
 
 func (b *telegramBot) Stop(ctx context.Context) error {
-	err := b.app.Commands.UpdateStatus.Handle(ctx, command.UpdateStatus{
+	err := b.app.Commands.UpdateStatus.Handle(ctx, app_l.UpdateStatus{
 		BotUUID: b.botUUID,
 		Status:  "stopped",
 	})
@@ -138,7 +136,7 @@ func (b *telegramBot) handleUpdate(ctx context.Context, update tg.Update) {
 func (b *telegramBot) handleCommand(ctx context.Context, msg *tg.Message) error {
 	switch msg.Command() {
 	case "start":
-		return b.app.Commands.Entry.Handle(ctx, command.Entry{
+		return b.app.Commands.Entry.Handle(ctx, app_l.Entry{
 			BotUUID: b.botUUID,
 			UserID:  msg.Chat.ID,
 			Key:     "start",
@@ -148,7 +146,7 @@ func (b *telegramBot) handleCommand(ctx context.Context, msg *tg.Message) error 
 }
 
 func (b *telegramBot) handleMessage(ctx context.Context, msg *tg.Message) error {
-	return b.app.Commands.Process.Handle(ctx, command.Process{
+	return b.app.Commands.Process.Handle(ctx, app_l.Process{
 		BotUUID: b.botUUID,
 		UserID:  msg.Chat.ID,
 		Text:    msg.Text,

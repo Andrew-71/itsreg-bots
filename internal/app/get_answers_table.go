@@ -1,10 +1,9 @@
-package query
+package app
 
 import (
 	"context"
 	"log/slog"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
@@ -14,7 +13,7 @@ type GetAnswersTable struct {
 	BotUUID  string
 }
 
-type GetAnswersTableHandler decorator.QueryHandler[GetAnswersTable, types.AnswersTable]
+type GetAnswersTableHandler decorator.QueryHandler[GetAnswersTable, AnswersTable]
 
 type answersHandler struct {
 	bots         bots.Repository
@@ -36,29 +35,29 @@ func NewGetAnswersTableHandler(
 		panic("participants repository is nil")
 	}
 
-	return decorator.ApplyQueryDecorators[GetAnswersTable, types.AnswersTable](
+	return decorator.ApplyQueryDecorators[GetAnswersTable, AnswersTable](
 		answersHandler{bots: bots, participants: participants},
 		logger,
 		metricsClient,
 	)
 }
 
-func (h answersHandler) Handle(ctx context.Context, query GetAnswersTable) (types.AnswersTable, error) {
+func (h answersHandler) Handle(ctx context.Context, query GetAnswersTable) (AnswersTable, error) {
 	bot, err := h.bots.Bot(ctx, query.BotUUID)
 	if err != nil {
-		return types.AnswersTable{}, err
+		return AnswersTable{}, err
 	}
 
 	if err = bot.CanSeeBot(query.UserUUID); err != nil {
-		return types.AnswersTable{}, err
+		return AnswersTable{}, err
 	}
 
 	prts, err := h.participants.ParticipantsOfBot(ctx, query.BotUUID)
 	if err != nil {
-		return types.AnswersTable{}, err
+		return AnswersTable{}, err
 	}
 
 	table := bots.NewAnswersTable(bot, prts)
 
-	return types.MapAnswersTableFromDomain(table), nil
+	return MapAnswersTableFromDomain(table), nil
 }

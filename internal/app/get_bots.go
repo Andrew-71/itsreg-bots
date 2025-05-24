@@ -1,10 +1,9 @@
-package query
+package app
 
 import (
 	"context"
 	"log/slog"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
@@ -13,7 +12,7 @@ type GetBots struct {
 	UserUUID string
 }
 
-type GetBotsHandler decorator.QueryHandler[GetBots, []types.Bot]
+type GetBotsHandler decorator.QueryHandler[GetBots, []Bot]
 
 type getBotsHandler struct {
 	bots bots.Repository
@@ -25,18 +24,18 @@ func NewGetBotsHandler(
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
 ) GetBotsHandler {
-	return decorator.ApplyQueryDecorators[GetBots, []types.Bot](
+	return decorator.ApplyQueryDecorators[GetBots, []Bot](
 		getBotsHandler{bots: bots},
 		logger,
 		metricsClient,
 	)
 }
 
-func (h getBotsHandler) Handle(ctx context.Context, query GetBots) ([]types.Bot, error) {
+func (h getBotsHandler) Handle(ctx context.Context, query GetBots) ([]Bot, error) {
 	bs, err := h.bots.UserBots(ctx, query.UserUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	return types.MapBotsFromDomain(bs), nil
+	return MapBotsFromDomain(bs), nil
 }

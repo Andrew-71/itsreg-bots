@@ -1,4 +1,4 @@
-package command
+package app
 
 import (
 	"context"
@@ -8,25 +8,25 @@ import (
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
 
-type StartBot struct {
+type StopBot struct {
 	AuthorUUID string
 	BotUUID    string
 }
 
-type StartBotHandler decorator.CommandHandler[StartBot]
+type StopBotHandler decorator.CommandHandler[StopBot]
 
-type startBotHandler struct {
+type stopBotHandler struct {
 	bots   bots.Repository
 	runPub bots.RunnerPublisher
 }
 
-func NewStartBotHandler(
+func NewStopBotHandler(
 	bots bots.Repository,
 	runPub bots.RunnerPublisher,
 
 	log *slog.Logger,
 	metricsClient decorator.MetricsClient,
-) StartBotHandler {
+) StopBotHandler {
 	if bots == nil {
 		panic("bots repository is nil")
 	}
@@ -35,14 +35,14 @@ func NewStartBotHandler(
 		panic("runner publisher is nil")
 	}
 
-	return decorator.ApplyCommandDecorators[StartBot](
-		&startBotHandler{bots: bots, runPub: runPub},
+	return decorator.ApplyCommandDecorators[StopBot](
+		&stopBotHandler{bots: bots, runPub: runPub},
 		log,
 		metricsClient,
 	)
 }
 
-func (h startBotHandler) Handle(ctx context.Context, cmd StartBot) error {
+func (h stopBotHandler) Handle(ctx context.Context, cmd StopBot) error {
 	bot, err := h.bots.Bot(ctx, cmd.BotUUID)
 	if err != nil {
 		return err
@@ -52,5 +52,5 @@ func (h startBotHandler) Handle(ctx context.Context, cmd StartBot) error {
 		return err
 	}
 
-	return h.runPub.PublishStart(ctx, cmd.BotUUID)
+	return h.runPub.PublishStop(ctx, cmd.BotUUID)
 }

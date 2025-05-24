@@ -1,17 +1,16 @@
-package query
+package app
 
 import (
 	"context"
 	"log/slog"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
 
 type GetStartedBots struct{}
 
-type GetStartedBotsHandler decorator.QueryHandler[GetStartedBots, []types.Bot]
+type GetStartedBotsHandler decorator.QueryHandler[GetStartedBots, []Bot]
 
 type getStartedBotsHandler struct {
 	bots bots.Repository
@@ -32,11 +31,11 @@ func NewGetStartedBotsHandler(
 	)
 }
 
-func (h getStartedBotsHandler) Handle(ctx context.Context, _ GetStartedBots) ([]types.Bot, error) {
+func (h getStartedBotsHandler) Handle(ctx context.Context, _ GetStartedBots) ([]Bot, error) {
 	bs, err := h.bots.BotsWithStatus(ctx, bots.Started)
 	if err != nil {
 		return nil, err
 	}
 
-	return types.MapBotsFromDomain(bs), nil
+	return MapBotsFromDomain(bs), nil
 }

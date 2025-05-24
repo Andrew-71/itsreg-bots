@@ -9,8 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/command"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/internal/infra"
 	"github.com/bmstu-itstech/itsreg-bots/internal/service/mocks"
@@ -77,21 +75,21 @@ func newApplication(
 ) *app.Application {
 	return &app.Application{
 		Commands: app.Commands{
-			CreateBot:     command.NewCreateBotHandler(bots, logger, metricsClient),
-			DeleteBot:     command.NewDeleteBotHandler(bots, runPub, logger, metricsClient),
-			StartBot:      command.NewStartBotHandler(bots, runPub, logger, metricsClient),
-			StopBot:       command.NewStopBotHandler(bots, runPub, logger, metricsClient),
-			UpdateStatus:  command.NewUpdateStatusHandler(bots, logger, metricsClient),
-			Entry:         command.NewEntryHandler(bots, participants, msgPub, logger, metricsClient),
-			Process:       command.NewProcessHandler(bots, participants, msgPub, logger, metricsClient),
-			CreateMailing: command.NewCreateMailingHandler(bots, logger, metricsClient),
-			StartMailing:  command.NewStartMailingHandler(bots, participants, msgPub, logger, metricsClient),
+			CreateBot:     app.NewCreateBotHandler(bots, logger, metricsClient),
+			DeleteBot:     app.NewDeleteBotHandler(bots, runPub, logger, metricsClient),
+			StartBot:      app.NewStartBotHandler(bots, runPub, logger, metricsClient),
+			StopBot:       app.NewStopBotHandler(bots, runPub, logger, metricsClient),
+			UpdateStatus:  app.NewUpdateStatusHandler(bots, logger, metricsClient),
+			Entry:         app.NewEntryHandler(bots, participants, msgPub, logger, metricsClient),
+			Process:       app.NewProcessHandler(bots, participants, msgPub, logger, metricsClient),
+			CreateMailing: app.NewCreateMailingHandler(bots, logger, metricsClient),
+			StartMailing:  app.NewStartMailingHandler(bots, participants, msgPub, logger, metricsClient),
 		},
 		Queries: app.Queries{
-			AllAnswers:  query.NewGetAnswersTableHandler(bots, participants, logger, metricsClient),
-			GetBot:      query.NewGetBotHandler(bots, logger, metricsClient),
-			GetBots:     query.NewGetBotsHandler(bots, logger, metricsClient),
-			StartedBots: query.NewGetStartedBotsHandler(bots, logger, metricsClient),
+			AllAnswers:  app.NewGetAnswersTableHandler(bots, participants, logger, metricsClient),
+			GetBot:      app.NewGetBotHandler(bots, logger, metricsClient),
+			GetBots:     app.NewGetBotsHandler(bots, logger, metricsClient),
+			StartedBots: app.NewGetStartedBotsHandler(bots, logger, metricsClient),
 		},
 	}
 }

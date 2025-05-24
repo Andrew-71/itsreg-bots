@@ -9,7 +9,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
 )
 
@@ -85,7 +84,7 @@ func (p *Port) handleRunnerMessage(ctx context.Context, msg runnerMessage) error
 func (p *Port) startAlreadyStartedBots() {
 	ctx := context.Background()
 
-	bots, err := p.app.Queries.StartedBots.Handle(ctx, query.GetStartedBots{})
+	bots, err := p.app.Queries.StartedBots.Handle(ctx, app.GetStartedBots{})
 	if err != nil {
 		p.log.Error("failed to get started bots", "err", err.Error())
 		return

@@ -1,10 +1,9 @@
-package command
+package app
 
 import (
 	"context"
 	"log/slog"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
@@ -16,9 +15,9 @@ type CreateBot struct {
 	Name    string
 	Token   string
 
-	Entries  []types.EntryPoint
-	Mailings []types.Mailing
-	Blocks   []types.Block
+	Entries  []EntryPoint
+	Mailings []Mailing
+	Blocks   []Block
 }
 
 type CreateBotHandler decorator.CommandHandler[CreateBot]
@@ -45,17 +44,17 @@ func NewCreateBotHandler(
 }
 
 func (h createBotHandler) Handle(ctx context.Context, cmd CreateBot) error {
-	entries, err := types.MapEntriesToDomain(cmd.Entries)
+	entries, err := MapEntriesToDomain(cmd.Entries)
 	if err != nil {
 		return err
 	}
 
-	mailings, err := types.MapMailingsToDomain(cmd.Mailings)
+	mailings, err := MapMailingsToDomain(cmd.Mailings)
 	if err != nil {
 		return err
 	}
 
-	blocks, err := types.MapBlocksToDomain(cmd.Blocks)
+	blocks, err := MapBlocksToDomain(cmd.Blocks)
 	if err != nil {
 		return err
 	}

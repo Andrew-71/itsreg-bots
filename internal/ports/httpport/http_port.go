@@ -9,9 +9,7 @@ import (
 	"github.com/go-chi/render"
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/command"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/query"
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
+
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/jwtauth"
 )
@@ -37,7 +35,7 @@ func (s Server) CreateBot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.app.Commands.CreateBot.Handle(r.Context(), command.CreateBot{
+	err = s.app.Commands.CreateBot.Handle(r.Context(), app.CreateBot{
 		BotUUID:    postBots.BotUUID,
 		AuthorUUID: userUUID,
 		Name:       postBots.Name,
@@ -72,7 +70,7 @@ func (s Server) DeleteBot(w http.ResponseWriter, r *http.Request, botUUID string
 		return
 	}
 
-	err = s.app.Commands.DeleteBot.Handle(r.Context(), command.DeleteBot{
+	err = s.app.Commands.DeleteBot.Handle(r.Context(), app.DeleteBot{
 		AuthorUUID: userUUID,
 		BotUUID:    botUUID,
 	})
@@ -103,7 +101,7 @@ func (s Server) CreateMailing(w http.ResponseWriter, r *http.Request, botUUID st
 		return
 	}
 
-	err = s.app.Commands.CreateMailing.Handle(r.Context(), command.CreateMailing{
+	err = s.app.Commands.CreateMailing.Handle(r.Context(), app.CreateMailing{
 		AuthorUUID:    userUUID,
 		BotUUID:       botUUID,
 		MailingName:   createMailing.Name,
@@ -138,7 +136,7 @@ func (s Server) GetBots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bs, err := s.app.Queries.GetBots.Handle(r.Context(), query.GetBots{
+	bs, err := s.app.Queries.GetBots.Handle(r.Context(), app.GetBots{
 		UserUUID: userUUID,
 	})
 	if err != nil {
@@ -156,7 +154,7 @@ func (s Server) StartBot(w http.ResponseWriter, r *http.Request, uuid string) {
 		return
 	}
 
-	err = s.app.Commands.StartBot.Handle(r.Context(), command.StartBot{
+	err = s.app.Commands.StartBot.Handle(r.Context(), app.StartBot{
 		AuthorUUID: userUUID,
 		BotUUID:    uuid,
 	})
@@ -181,7 +179,7 @@ func (s Server) StopBot(w http.ResponseWriter, r *http.Request, uuid string) {
 		return
 	}
 
-	err = s.app.Commands.StopBot.Handle(r.Context(), command.StopBot{
+	err = s.app.Commands.StopBot.Handle(r.Context(), app.StopBot{
 		AuthorUUID: userUUID,
 		BotUUID:    uuid,
 	})
@@ -206,7 +204,7 @@ func (s Server) StartMailing(w http.ResponseWriter, r *http.Request, uuid string
 		return
 	}
 
-	err = s.app.Commands.StartMailing.Handle(r.Context(), command.StartMailing{
+	err = s.app.Commands.StartMailing.Handle(r.Context(), app.StartMailing{
 		AuthorUUID: userUUID,
 		BotUUID:    uuid,
 		EntryKey:   entryKey,
@@ -232,7 +230,7 @@ func (s Server) GetBot(w http.ResponseWriter, r *http.Request, uuid string) {
 		return
 	}
 
-	bot, err := s.app.Queries.GetBot.Handle(r.Context(), query.GetBot{
+	bot, err := s.app.Queries.GetBot.Handle(r.Context(), app.GetBot{
 		UserUUID: userUUID,
 		BotUUID:  uuid,
 	})
@@ -259,7 +257,7 @@ func (s Server) GetAnswers(w http.ResponseWriter, r *http.Request, uuid string) 
 		return
 	}
 
-	answers, err := s.app.Queries.AllAnswers.Handle(r.Context(), query.GetAnswersTable{
+	answers, err := s.app.Queries.AllAnswers.Handle(r.Context(), app.GetAnswersTable{
 		UserUUID: userUUID,
 		BotUUID:  uuid,
 	})
@@ -296,21 +294,21 @@ func httpSlugError(w http.ResponseWriter, r *http.Request, msg string, slug stri
 	})
 }
 
-func convertOptionToAPI(option types.Option) Option {
+func convertOptionToAPI(option app.Option) Option {
 	return Option{
 		Next: option.Next,
 		Text: option.Text,
 	}
 }
 
-func convertOptionFromAPI(option Option) types.Option {
-	return types.Option{
+func convertOptionFromAPI(option Option) app.Option {
+	return app.Option{
 		Text: option.Text,
 		Next: option.Next,
 	}
 }
 
-func convertOptionsToAPI(options []types.Option) *[]Option {
+func convertOptionsToAPI(options []app.Option) *[]Option {
 	res := make([]Option, len(options))
 	for i, option := range options {
 		res[i] = convertOptionToAPI(option)
@@ -318,32 +316,32 @@ func convertOptionsToAPI(options []types.Option) *[]Option {
 	return &res
 }
 
-func convertOptionsFromAPI(options *[]Option) []types.Option {
+func convertOptionsFromAPI(options *[]Option) []app.Option {
 	if options == nil {
 		return nil
 	}
-	res := make([]types.Option, len(*options))
+	res := make([]app.Option, len(*options))
 	for i, option := range *options {
 		res[i] = convertOptionFromAPI(option)
 	}
 	return res
 }
 
-func convertEntryPointToAPI(entry types.EntryPoint) EntryPoint {
+func convertEntryPointToAPI(entry app.EntryPoint) EntryPoint {
 	return EntryPoint{
 		Key:   entry.Key,
 		State: entry.State,
 	}
 }
 
-func convertEntryPointFromAPI(entry EntryPoint) types.EntryPoint {
-	return types.EntryPoint{
+func convertEntryPointFromAPI(entry EntryPoint) app.EntryPoint {
+	return app.EntryPoint{
 		Key:   entry.Key,
 		State: entry.State,
 	}
 }
 
-func convertEntryPointsToAPI(entries []types.EntryPoint) []EntryPoint {
+func convertEntryPointsToAPI(entries []app.EntryPoint) []EntryPoint {
 	res := make([]EntryPoint, len(entries))
 	for i, entry := range entries {
 		res[i] = convertEntryPointToAPI(entry)
@@ -351,15 +349,15 @@ func convertEntryPointsToAPI(entries []types.EntryPoint) []EntryPoint {
 	return res
 }
 
-func convertEntryPointsFromAPI(entries []EntryPoint) []types.EntryPoint {
-	res := make([]types.EntryPoint, len(entries))
+func convertEntryPointsFromAPI(entries []EntryPoint) []app.EntryPoint {
+	res := make([]app.EntryPoint, len(entries))
 	for i, entry := range entries {
 		res[i] = convertEntryPointFromAPI(entry)
 	}
 	return res
 }
 
-func convertMailingToAPI(mailing types.Mailing) Mailing {
+func convertMailingToAPI(mailing app.Mailing) Mailing {
 	return Mailing{
 		EntryKey:      mailing.EntryKey,
 		Name:          mailing.Name,
@@ -367,7 +365,7 @@ func convertMailingToAPI(mailing types.Mailing) Mailing {
 	}
 }
 
-func convertOptionalMailingsToAPI(mailings []types.Mailing) *[]Mailing {
+func convertOptionalMailingsToAPI(mailings []app.Mailing) *[]Mailing {
 	res := make([]Mailing, len(mailings))
 	for i, mailing := range mailings {
 		res[i] = convertMailingToAPI(mailing)
@@ -375,31 +373,31 @@ func convertOptionalMailingsToAPI(mailings []types.Mailing) *[]Mailing {
 	return &res
 }
 
-func convertMailingFromAPI(mailing Mailing) types.Mailing {
-	return types.Mailing{
+func convertMailingFromAPI(mailing Mailing) app.Mailing {
+	return app.Mailing{
 		Name:          mailing.Name,
 		EntryKey:      mailing.EntryKey,
 		RequiredState: mailing.RequiredState,
 	}
 }
 
-func convertMailingsFromAPI(mailings []Mailing) []types.Mailing {
-	res := make([]types.Mailing, len(mailings))
+func convertMailingsFromAPI(mailings []Mailing) []app.Mailing {
+	res := make([]app.Mailing, len(mailings))
 	for i, mailing := range mailings {
 		res[i] = convertMailingFromAPI(mailing)
 	}
 	return res
 }
 
-func convertOptionalMailingsFromAPI(mailings *[]Mailing) []types.Mailing {
+func convertOptionalMailingsFromAPI(mailings *[]Mailing) []app.Mailing {
 	if mailings == nil {
-		return make([]types.Mailing, 0)
+		return make([]app.Mailing, 0)
 	}
 
 	return convertMailingsFromAPI(*mailings)
 }
 
-func convertBlockToAPI(block types.Block) Block {
+func convertBlockToAPI(block app.Block) Block {
 	return Block{
 		Type:      BlockType(block.Type),
 		NextState: block.NextState,
@@ -410,8 +408,8 @@ func convertBlockToAPI(block types.Block) Block {
 	}
 }
 
-func convertBlockFromAPI(block Block) types.Block {
-	return types.Block{
+func convertBlockFromAPI(block Block) app.Block {
+	return app.Block{
 		Type:      string(block.Type),
 		State:     block.State,
 		NextState: block.NextState,
@@ -421,7 +419,7 @@ func convertBlockFromAPI(block Block) types.Block {
 	}
 }
 
-func convertBlocksToAPI(blocks []types.Block) []Block {
+func convertBlocksToAPI(blocks []app.Block) []Block {
 	res := make([]Block, len(blocks))
 	for i, block := range blocks {
 		res[i] = convertBlockToAPI(block)
@@ -429,15 +427,15 @@ func convertBlocksToAPI(blocks []types.Block) []Block {
 	return res
 }
 
-func convertBlocksFromAPI(blocks []Block) []types.Block {
-	res := make([]types.Block, len(blocks))
+func convertBlocksFromAPI(blocks []Block) []app.Block {
+	res := make([]app.Block, len(blocks))
 	for i, block := range blocks {
 		res[i] = convertBlockFromAPI(block)
 	}
 	return res
 }
 
-func convertBotToAPI(bot types.Bot) Bot {
+func convertBotToAPI(bot app.Bot) Bot {
 	return Bot{
 		Blocks:    convertBlocksToAPI(bot.Blocks),
 		BotUUID:   bot.UUID,
@@ -451,7 +449,7 @@ func convertBotToAPI(bot types.Bot) Bot {
 	}
 }
 
-func convertBotsToAPI(bs []types.Bot) []Bot {
+func convertBotsToAPI(bs []app.Bot) []Bot {
 	res := make([]Bot, len(bs))
 	for i, b := range bs {
 		res[i] = convertBotToAPI(b)
@@ -459,7 +457,7 @@ func convertBotsToAPI(bs []types.Bot) []Bot {
 	return res
 }
 
-func renderCSVAnswers(w http.ResponseWriter, answers types.AnswersTable) error {
+func renderCSVAnswers(w http.ResponseWriter, answers app.AnswersTable) error {
 	csvWriter := csv.NewWriter(w)
 	w.Header().Set("Content-Type", "text/csv")
 

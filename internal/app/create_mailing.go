@@ -1,10 +1,9 @@
-package command
+package app
 
 import (
 	"context"
 	"log/slog"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/app/types"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/decorator"
 )
@@ -16,8 +15,8 @@ type CreateMailing struct {
 	MailingName   string
 	RequiredState int
 
-	EntryPoint types.EntryPoint
-	Blocks     []types.Block
+	EntryPoint EntryPoint
+	Blocks     []Block
 }
 
 type CreateMailingHandler decorator.CommandHandler[CreateMailing]
@@ -48,12 +47,12 @@ func (h createMailingHandler) Handle(ctx context.Context, cmd CreateMailing) err
 			return err
 		}
 
-		entry, err := types.MapEntryPointToDomain(cmd.EntryPoint)
+		entry, err := MapEntryPointToDomain(cmd.EntryPoint)
 		if err != nil {
 			return err
 		}
 
-		blocks, err := types.MapBlocksToDomain(cmd.Blocks)
+		blocks, err := MapBlocksToDomain(cmd.Blocks)
 		if err != nil {
 			return err
 		}
