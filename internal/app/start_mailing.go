@@ -19,13 +19,13 @@ type StartMailingHandler decorator.CommandHandler[StartMailing]
 type startMailingHandler struct {
 	bots         bots.Repository
 	participants bots.ParticipantRepository
-	msgPublisher bots.MessagesPublisher
+	msgSender    bots.BotMessageSender
 }
 
 func NewStartMailingHandler(
 	bots bots.Repository,
 	participants bots.ParticipantRepository,
-	msgPublisher bots.MessagesPublisher,
+	msgSender bots.BotMessageSender,
 
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
@@ -38,12 +38,12 @@ func NewStartMailingHandler(
 		panic("participants repository is nil")
 	}
 
-	if msgPublisher == nil {
-		panic("message publisher is nil")
+	if msgSender == nil {
+		panic("message sender is nil")
 	}
 
 	return decorator.ApplyCommandDecorators[StartMailing](
-		&startMailingHandler{bots, participants, msgPublisher},
+		&startMailingHandler{bots, participants, msgSender},
 		logger,
 		metricsClient,
 	)
@@ -81,7 +81,7 @@ func (h *startMailingHandler) Handle(ctx context.Context, cmd StartMailing) erro
 				}
 
 				for _, message := range messages {
-					err = h.msgPublisher.Publish(ctx, cmd.BotUUID, prt.UserID, message)
+					err = h.msgSender.Send(ctx, bot.Token, prt.UserID, message)
 					if err != nil {
 						return err
 					}

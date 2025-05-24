@@ -16,13 +16,13 @@ type StartBot struct {
 type StartBotHandler decorator.CommandHandler[StartBot]
 
 type startBotHandler struct {
-	bots   bots.Repository
-	runPub bots.RunnerPublisher
+	bots bots.Repository
+	im   bots.InstanceManager
 }
 
 func NewStartBotHandler(
 	bots bots.Repository,
-	runPub bots.RunnerPublisher,
+	im bots.InstanceManager,
 
 	log *slog.Logger,
 	metricsClient decorator.MetricsClient,
@@ -31,12 +31,12 @@ func NewStartBotHandler(
 		panic("bots repository is nil")
 	}
 
-	if runPub == nil {
-		panic("runner publisher is nil")
+	if im == nil {
+		panic("instance manager is nil")
 	}
 
 	return decorator.ApplyCommandDecorators[StartBot](
-		&startBotHandler{bots: bots, runPub: runPub},
+		&startBotHandler{bots: bots, im: im},
 		log,
 		metricsClient,
 	)
@@ -52,5 +52,5 @@ func (h startBotHandler) Handle(ctx context.Context, cmd StartBot) error {
 		return err
 	}
 
-	return h.runPub.PublishStart(ctx, cmd.BotUUID)
+	return h.im.Start(ctx, bot.UUID, bot.Token)
 }

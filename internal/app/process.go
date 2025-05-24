@@ -19,13 +19,13 @@ type ProcessHandler decorator.CommandHandler[Process]
 type processHandler struct {
 	bots         bots.Repository
 	participants bots.ParticipantRepository
-	msgPublisher bots.MessagesPublisher
+	msgSender    bots.BotMessageSender
 }
 
 func NewProcessHandler(
 	bots bots.Repository,
 	participants bots.ParticipantRepository,
-	msgPublisher bots.MessagesPublisher,
+	msgSender bots.BotMessageSender,
 
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
@@ -38,12 +38,12 @@ func NewProcessHandler(
 		panic("participants repository is nil")
 	}
 
-	if msgPublisher == nil {
-		panic("message publisher is nil")
+	if msgSender == nil {
+		panic("message sender is nil")
 	}
 
 	return decorator.ApplyCommandDecorators[Process](
-		processHandler{bots: bots, participants: participants, msgPublisher: msgPublisher},
+		processHandler{bots: bots, participants: participants, msgSender: msgSender},
 		logger,
 		metricsClient,
 	)
@@ -64,7 +64,7 @@ func (h processHandler) Handle(ctx context.Context, cmd Process) error {
 		}
 
 		for _, message := range messages {
-			err = h.msgPublisher.Publish(innerCtx, cmd.BotUUID, cmd.UserID, message)
+			err = h.msgSender.Send(innerCtx, bot.Token, cmd.UserID, message)
 			if err != nil {
 				return err
 			}

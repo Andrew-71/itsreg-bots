@@ -19,13 +19,13 @@ type EntryHandler decorator.CommandHandler[Entry]
 type entryHandler struct {
 	bots         bots.Repository
 	participants bots.ParticipantRepository
-	msgPublisher bots.MessagesPublisher
+	msgSender    bots.BotMessageSender
 }
 
 func NewEntryHandler(
 	bots bots.Repository,
 	participants bots.ParticipantRepository,
-	msgPublisher bots.MessagesPublisher,
+	msgSender bots.BotMessageSender,
 
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
@@ -38,12 +38,12 @@ func NewEntryHandler(
 		panic("participants repository is nil")
 	}
 
-	if msgPublisher == nil {
-		panic("message publisher is nil")
+	if msgSender == nil {
+		panic("message sender is nil")
 	}
 
 	return decorator.ApplyCommandDecorators[Entry](
-		entryHandler{bots: bots, participants: participants, msgPublisher: msgPublisher},
+		entryHandler{bots: bots, participants: participants, msgSender: msgSender},
 		logger,
 		metricsClient,
 	)
@@ -64,7 +64,7 @@ func (h entryHandler) Handle(ctx context.Context, cmd Entry) error {
 		}
 
 		for _, message := range messages {
-			err = h.msgPublisher.Publish(innerCtx, cmd.BotUUID, cmd.UserID, message)
+			err = h.msgSender.Send(innerCtx, bot.Token, cmd.UserID, message)
 			if err != nil {
 				return err
 			}

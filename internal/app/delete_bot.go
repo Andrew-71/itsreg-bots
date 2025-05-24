@@ -16,13 +16,13 @@ type DeleteBot struct {
 type DeleteBotHandler decorator.CommandHandler[DeleteBot]
 
 type deleteBotHandler struct {
-	bots   bots.Repository
-	runPub bots.RunnerPublisher
+	bots bots.Repository
+	im   bots.InstanceManager
 }
 
 func NewDeleteBotHandler(
 	bots bots.Repository,
-	runPub bots.RunnerPublisher,
+	im bots.InstanceManager,
 	logger *slog.Logger,
 	metricsClient decorator.MetricsClient,
 ) DeleteBotHandler {
@@ -31,7 +31,7 @@ func NewDeleteBotHandler(
 	}
 
 	return decorator.ApplyCommandDecorators[DeleteBot](
-		deleteBotHandler{bots, runPub},
+		deleteBotHandler{bots, im},
 		logger, metricsClient,
 	)
 }
@@ -46,7 +46,7 @@ func (h deleteBotHandler) Handle(ctx context.Context, cmd DeleteBot) error {
 		return err
 	}
 
-	err = h.runPub.PublishStop(ctx, bot.UUID)
+	err = h.im.Stop(ctx, cmd.BotUUID)
 	if err != nil {
 		return err
 	}
