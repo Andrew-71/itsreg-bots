@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/bmstu-itstech/itsreg-bots/internal/ports/httpport"
+	httpapi "github.com/bmstu-itstech/itsreg-bots/internal/api/http"
 	"github.com/bmstu-itstech/itsreg-bots/internal/service"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/server"
 )
@@ -20,6 +20,6 @@ func main() {
 	}()
 
 	server.RunHTTPServer(func(router chi.Router) http.Handler {
-		return httpport.HandlerFromMux(httpport.NewHTTPServer(app), router)
+		return httpapi.HandlerFromMux(httpapi.NewHTTPServer(app), router)
 	})
 }

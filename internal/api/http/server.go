@@ -1,4 +1,4 @@
-package httpport
+package http
 
 import (
 	"encoding/csv"
@@ -16,10 +16,6 @@ import (
 
 type Server struct {
 	app *app.Application
-}
-
-func NewHTTPServer(app *app.Application) *Server {
-	return &Server{app: app}
 }
 
 func (s Server) CreateBot(w http.ResponseWriter, r *http.Request) {
@@ -279,6 +275,10 @@ func (s Server) GetAnswers(w http.ResponseWriter, r *http.Request, uuid string) 
 		httpError(w, r, err, http.StatusInternalServerError)
 		return
 	}
+}
+
+func NewHTTPServer(app *app.Application) *Server {
+	return &Server{app: app}
 }
 
 func httpError(w http.ResponseWriter, r *http.Request, err error, code int) {
