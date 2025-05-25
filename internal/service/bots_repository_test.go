@@ -1,4 +1,4 @@
-package infra_test
+package service_test
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
-	"github.com/bmstu-itstech/itsreg-bots/internal/infra"
+	"github.com/bmstu-itstech/itsreg-bots/internal/service"
 )
 
 func TestPgBotsRepository(t *testing.T) {
@@ -29,7 +29,7 @@ func TestPgBotsRepository(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	repos := infra.NewPgBotsRepository(db)
+	repos := service.NewPgBotsRepository(db)
 	testBotsRepository(t, repos)
 }
 

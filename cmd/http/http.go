@@ -11,7 +11,6 @@ import (
 	httpapi "github.com/bmstu-itstech/itsreg-bots/internal/api/http"
 	"github.com/bmstu-itstech/itsreg-bots/internal/app"
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
-	"github.com/bmstu-itstech/itsreg-bots/internal/infra"
 	"github.com/bmstu-itstech/itsreg-bots/internal/service"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/logs"
 	"github.com/bmstu-itstech/itsreg-bots/pkg/metrics"
@@ -25,8 +24,8 @@ func main() {
 	url := os.Getenv("DATABASE_URI")
 	db := sqlx.MustConnect("postgres", url)
 
-	botRepository := infra.NewPgBotsRepository(db)
-	participantRepository := infra.NewPgParticipantsRepository(db)
+	botRepository := service.NewPgBotsRepository(db)
+	participantRepository := service.NewPgParticipantsRepository(db)
 	botMessageSender := service.NewTelegramMessageSender()
 
 	process := ProcessHandlerAdapter{app.NewProcessHandler(botRepository, participantRepository, botMessageSender, l, mc)}

@@ -14,7 +14,7 @@ docker compose -f deployment/docker-compose.local.yaml up -d
 
 Запуск тестов:
 - `go test -short ./internal/domain/...` - юнит-тесты домена;
-- `go test -count=1 ./internal/infra/...` - интеграционные (инфраструктурные) тесты; также требуется задать переменную
+- `go test -count=1 ./internal/service/...` - интеграционные (инфраструктурные) тесты; также требуется задать переменную
   окружения `DATABASE_URI` (для local - `postgres://test-user:test-pass@localhost:30001/test-db?sslmode=disable`);
 
 Запуск HTTP сервера API - `go run ./cmd/http/http.go` (требуется задать переменные окружения `PORT` и `DATABASE_URI`)

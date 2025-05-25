@@ -1,4 +1,4 @@
-package infra_test
+package service_test
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/zhikh23/pgutils"
 
 	"github.com/bmstu-itstech/itsreg-bots/internal/domain/bots"
-	"github.com/bmstu-itstech/itsreg-bots/internal/infra"
+	"github.com/bmstu-itstech/itsreg-bots/internal/service"
 )
 
 var (
@@ -34,7 +34,7 @@ func TestPgParticipantsRepository(t *testing.T) {
 	err := setupDBParticipants(context.Background(), db)
 	require.NoError(t, err)
 
-	repos := infra.NewPgParticipantsRepository(db)
+	repos := service.NewPgParticipantsRepository(db)
 	testParticipantsRepository(t, repos)
 }
 
