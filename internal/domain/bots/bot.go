@@ -28,6 +28,66 @@ type Bot struct {
 	UpdatedAt time.Time
 }
 
+func commonBotValidate(
+	uuid string,
+	ownerUUID string,
+	entries []EntryPoint,
+	blocks []Block,
+	name string,
+	token string,
+) error {
+	if uuid == "" {
+		return NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty bot uuid",
+		)
+	}
+
+	if ownerUUID == "" {
+		return NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty owner uuid",
+		)
+	}
+
+	if len(entries) == 0 {
+		return NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one entry",
+		)
+	}
+
+	if len(blocks) == 0 {
+		return NewInvalidInputError(
+			"invalid-bot",
+			"expected at least one block",
+		)
+	}
+
+	if name == "" {
+		return NewInvalidInputError(
+			"invalid-bot",
+			"expected non-empty name",
+		)
+	}
+
+	if token == "" {
+		return NewInvalidInputError(
+			"invalid-token",
+			"expected non-empty token",
+		)
+	}
+
+	if !regexp.MustCompile("[0-9]{8,10}:[a-zA-Z0-9_-]{35}").MatchString(token) {
+		return NewInvalidInputError(
+			"invalid-token",
+			"token doesn't satisfy regex",
+		)
+	}
+
+	return nil
+}
+
 func NewBot(
 	uuid string,
 	ownerUUID string,
@@ -37,74 +97,17 @@ func NewBot(
 	name string,
 	token string,
 ) (*Bot, error) {
-	if uuid == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty bot uuid",
-		)
-	}
-
-	if ownerUUID == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty owner uuid",
-		)
-	}
-
-	if len(entries) == 0 {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected at least one entry",
-		)
+	if err := commonBotValidate(uuid, ownerUUID, entries, blocks, name, token); err != nil {
+		return nil, err
 	}
 
 	if mailings == nil {
 		mailings = make([]Mailing, 0)
 	}
 
-	if len(blocks) == 0 {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected at least one block",
-		)
-	}
-
-	if name == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty name",
-		)
-	}
-
-	if token == "" {
-		return nil, NewInvalidInputError(
-			"invalid-token",
-			"expected non-empty token",
-		)
-	}
-
-	if !regexp.MustCompile("[0-9]{8,10}:[a-zA-Z0-9_-]{35}").MatchString(token) {
-		return nil, NewInvalidInputError(
-			"invalid-token",
-			"token doesn't satisfy regex",
-		)
-	}
-
-	for _, entry := range entries {
-		if entry.IsZero() {
-			return nil, errEntryPointIsEmpty
-		}
-	}
-
 	es, err := mapEntries(entries)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, block := range blocks {
-		if block.IsZero() {
-			return nil, errBlockIsEmpty
-		}
 	}
 
 	if _, ok := es[startEntryKey]; !ok {
@@ -113,6 +116,10 @@ func NewBot(
 
 	bs, err := mapBlocks(blocks)
 	if err != nil {
+		return nil, err
+	}
+
+	if err = hasMessageLoops(bs); err != nil {
 		return nil, err
 	}
 
@@ -173,6 +180,9 @@ func MustNewBot(
 	return b
 }
 
+// note: мы теоретически можем объединить NewBot и UnmarshallBotFromDB,
+// они по логике очень похожи
+
 func UnmarshallBotFromDB(
 	uuid string,
 	ownerUUID string,
@@ -185,50 +195,12 @@ func UnmarshallBotFromDB(
 	createdAt time.Time,
 	updatedAt time.Time,
 ) (*Bot, error) {
-	if uuid == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty bot uuid",
-		)
-	}
-
-	if ownerUUID == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty owner id",
-		)
-	}
-
-	if len(entries) == 0 {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected at least one entry",
-		)
+	if err := commonBotValidate(uuid, ownerUUID, entries, blocks, name, token); err != nil {
+		return nil, err
 	}
 
 	if mailings == nil {
 		mailings = make([]Mailing, 0)
-	}
-
-	if len(blocks) == 0 {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected at least one block",
-		)
-	}
-
-	if name == "" {
-		return nil, NewInvalidInputError(
-			"invalid-bot",
-			"expected non-empty name",
-		)
-	}
-
-	if token == "" {
-		return nil, NewInvalidInputError(
-			"invalid-token",
-			"expected non-empty token",
-		)
 	}
 
 	if status == "" {
@@ -252,25 +224,23 @@ func UnmarshallBotFromDB(
 		)
 	}
 
+	es, err := mapEntries(entries)
+	if err != nil {
+		return nil, err
+	}
+
 	bs, err := mapBlocks(blocks)
 	if err != nil {
 		return nil, err
 	}
 
-	es, err := mapEntries(entries)
-	if err != nil {
+	if err = hasMessageLoops(bs); err != nil {
 		return nil, err
 	}
 
 	ms, err := mapMailings(mailings)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, m := range mailings {
-		if m.IsZero() {
-			return nil, errMailingIsEmpty
-		}
 	}
 
 	st, err := NewStatusFromString(status)
@@ -390,6 +360,10 @@ func (b *Bot) AddMailing(name string, requireState int, entry EntryPoint, blocks
 		return newUnusedBlockFoundError(whiteVertexState)
 	}
 
+	if err = hasMessageLoops(bs); err != nil {
+		return err
+	}
+
 	mailing, err := NewMailing(name, entry.Key, requireState)
 	if err != nil {
 		return err
@@ -446,6 +420,13 @@ func newBlockIsDuplicatedError(state int) error {
 	)
 }
 
+func newBlockLoopError(state int) error {
+	return NewInvalidInputError(
+		"invalid-block-loop",
+		fmt.Sprintf("block with state %d causes an infinite loop", state),
+	)
+}
+
 func newUnusedBlockFoundError(state int) error {
 	return NewInvalidInputError(
 		"invalid-block-unused",
@@ -470,6 +451,9 @@ func newMailingIsDuplicatedError(key string) error {
 func mapBlocks(blocks []Block) (map[int]Block, error) {
 	mapped := make(map[int]Block)
 	for _, block := range blocks {
+		if block.IsZero() {
+			return nil, errBlockIsEmpty
+		}
 		if _, ok := mapped[block.State]; ok {
 			return nil, newBlockIsDuplicatedError(block.State)
 		}
@@ -481,6 +465,9 @@ func mapBlocks(blocks []Block) (map[int]Block, error) {
 func mapEntries(entries []EntryPoint) (map[string]EntryPoint, error) {
 	mapped := make(map[string]EntryPoint)
 	for _, entry := range entries {
+		if entry.IsZero() {
+			return nil, errEntryPointIsEmpty
+		}
 		if _, ok := mapped[entry.Key]; ok {
 			return nil, newEntryIsDuplicatedError(entry.Key)
 		}
@@ -492,6 +479,9 @@ func mapEntries(entries []EntryPoint) (map[string]EntryPoint, error) {
 func mapMailings(mailings []Mailing) (map[string]Mailing, error) {
 	mapped := make(map[string]Mailing)
 	for _, mailing := range mailings {
+		if mailing.IsZero() {
+			return nil, errMailingIsEmpty
+		}
 		if _, ok := mapped[mailing.EntryKey]; ok {
 			return nil, newMailingIsDuplicatedError(mailing.EntryKey)
 		}
@@ -577,4 +567,31 @@ func (b *Bot) traverseRecursive(vertices map[int]*vertex, currentState int) {
 			next.Color = black
 		}
 	}
+}
+
+// hasMessageLoops saves us from some ill-formatted bots crashing entire server
+func hasMessageLoops(blocks map[int]Block) error {
+	visited := make(map[int]bool)
+	for i := range blocks {
+		visited[i] = false
+	}
+	for i := range blocks {
+		if err := hasMessageLoopsRecursive(i, blocks, visited); err != nil {
+			fmt.Println(blocks)
+			return err
+		}
+	}
+	return nil
+}
+
+func hasMessageLoopsRecursive(curr int, blocks map[int]Block, visited map[int]bool) error {
+	if blocks[curr].Type == MessageBlock {
+		if visited[curr] {
+			return newBlockLoopError(curr)
+		}
+		visited[curr] = true
+		i := blocks[curr].NextState
+		return hasMessageLoopsRecursive(i, blocks, visited)
+	}
+	return nil
 }
